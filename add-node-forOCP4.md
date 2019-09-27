@@ -19,7 +19,13 @@ dhcp-host=00:50:56:b6:39:f4,worker-2,10.0.1.112 #add for new worker node
 2. 
 1. Boot new worker node from vSphere
 1. Enter boot image / ignition file URL
+1. Edject CD-ROM after CoreOS rebooting and Reset VM power
+1. Confirm CorOS login prompt and IP address you assigned from VMware Web Console
 1. 
+
+
+##
+
 
 ## Links
 赤帽エンジニアブログ
