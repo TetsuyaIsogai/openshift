@@ -22,13 +22,53 @@
 [root@worker-2 ~]# subscription-manager refresh
 ローカルデータがすべて更新されました
 ```
-1. subscription manager poolid
+1. subscription manager attach poolid
 #pool id is on the `https://access.redhat.com/management/subscriptions/`
 ```
 subscription-manager attach --pool=<pool_id>
 ```
-1. 
+#both Redhat Developers subscription & OpenShift subscription are needed
+#Confirmation
+```
+[root@worker-2 ~]# subscription-manager list
++-------------------------------------------+
+    インストール済み製品のステータス
++-------------------------------------------+
+製品名:           Red Hat OpenShift Container Platform
+製品 ID:          290
+バージョン:       4.1
+アーキテクチャー: x86_64
+状態:             サブスクライブ済み
+状態の詳細:
+開始:             2019年09月30日
+終了:             2020年09月30日
 
+製品名:           Red Hat Enterprise Linux Server
+製品 ID:          69
+バージョン:       7.6
+アーキテクチャー: x86_64
+状態:             サブスクライブ済み
+状態の詳細:
+開始:             2019年07月31日
+終了:             2020年09月30日
+```
+1. Enable repos
+```
+[root@worker-2 ~]# subscription-manager repos \
+>     --enable="rhel-7-server-rpms" \
+>     --enable="rhel-7-server-extras-rpms" \
+>     --enable="rhel-7-server-ansible-2.7-rpms" \
+>     --enable="rhel-7-server-ose-4.1-rpms"
+リポジトリー 'rhel-7-server-rpms' は、このシステムに対して有効になりました。
+リポジトリー 'rhel-7-server-ansible-2.7-rpms' は、このシステムに対して有効になりました。
+リポジトリー 'rhel-7-server-ose-4.1-rpms' は、このシステムに対して有効になりました。
+リポジトリー 'rhel-7-server-extras-rpms' は、このシステムに対して有効になりました。
+```
+1. Install Client tools
+```
+yum install openshift-ansible openshift-clients jq
+```
+#openshift-clients might be error, install from https://cloud.redhat.com/openshift/install
 
 
 Links
