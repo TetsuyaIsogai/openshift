@@ -27,9 +27,9 @@
 ```
 subscription-manager attach --pool=<pool_id>
 ```
-#both Redhat Developers subscription & OpenShift subscription are needed
+#both Redhat Developers subscription & OpenShift subscription are needed  
 #Confirmation
-```
+```  
 [root@worker-2 ~]# subscription-manager list
 +-------------------------------------------+
     インストール済み製品のステータス
