@@ -239,8 +239,41 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 1. subscription-manager attach --pool=<pool-id>
 1. disable repo
   1. subscription-manager repos --disable="*"
-  1. 
+  1. Enable repos
+```
+    subscription-manager repos \
+    --enable="rhel-7-server-rpms" \
+    --enable="rhel-7-server-extras-rpms" \
+    --enable="rhel-7-server-ose-4.1-rpms"
+```
+```
+    リポジトリー 'rhel-7-server-rpms' は、このシステムに対して有効になりました。
+    リポジトリー 'rhel-7-server-ose-4.1-rpms' は、このシステムに対して有効になりました。
+    リポジトリー 'rhel-7-server-extras-rpms' は、このシステムに対して有効になりました。
+```
+### Add Worker node
+#### on bastion node
+1. configure ssh public key access bastion to worker
+    
+1. create pull secret file
+    `oc -n openshift-config get -o jsonpath='{.data.\.dockerconfigjson}' secret pull-secret | base64 -d | jq . |tee pull-secret.txt`
+1. create hosts file
+    ```
+    [all:vars]
+    ansible_user=root
+    #ansible_become=True
 
+    openshift_kubeconfig_path="/home/newgen/bare-metal/auth/kubeconfig"
+    openshift_pull_secret_path="/home/newgen/add-rhel-worker/pull-secret.txt"
+
+    [new_workers]
+    worker-2.oc4cluster.tetsuya.local
+    ```
+1. exec playbook
+```
+$ cd /usr/share/ansible/openshift-ansible
+$ ansible-playbook -i /<path>/inventory/hosts playbooks/scaleup.yml 
+```
 
 
 Links
