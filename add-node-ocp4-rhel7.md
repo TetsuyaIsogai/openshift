@@ -282,6 +282,28 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 $ cd /usr/share/ansible/openshift-ansible
 $ ansible-playbook -i /<path>/inventory/hosts playbooks/scaleup.yml 
 ```
+#*you can see the install progress by using `journalctl -xef` on worker node*
+
+```
+PLAY RECAP **********************************************************************************************************
+localhost                  : ok=0    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+worker-2.oc4cluster.tetsuya.local : ok=9    changed=6    unreachable=0    failed=1    skipped=0    rescued=0    ignor
+ed=0                                                                                                                 
+                                                                                                                     
+Thursday 03 October 2019  12:23:51 +0900 (0:00:00.409)       0:50:56.576 ******                                      
+===============================================================================                                      
+openshift_node : Install openshift support packages ------------------------------------------------------- 2779.44s 
+openshift_node : Install openshift packages ---------------------------------------------------------------- 272.18s 
+Gathering Facts ---------------------------------------------------------------------------------------------- 2.12s 
+openshift_node : Enable the CRI-O service -------------------------------------------------------------------- 0.83s 
+openshift_node : sysctl -------------------------------------------------------------------------------------- 0.42s 
+openshift_node : Setting sebool container_manage_cgroup ------------------------------------------------------ 0.41s 
+openshift_node : Disable swap -------------------------------------------------------------------------------- 0.40s 
+openshift_node : Disable firewalld service ------------------------------------------------------------------- 0.37s 
+openshift_node : include_tasks ------------------------------------------------------------------------------- 0.22s 
+openshift_node : include_tasks ------------------------------------------------------------------------------- 0.09s 
+fail --------------------------------------------------------------------------------------------------------- 0.04s 
+```
 
 
 Links
