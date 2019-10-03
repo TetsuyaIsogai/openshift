@@ -254,7 +254,10 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 ### Add Worker node
 #### on bastion node
 1. configure ssh public key access bastion to worker
-    
+    From Worker node: `mkdir ~/.ssh; chmod 700 .ssh`
+    From bastion node: `scp <public-key> root@<new-worker>:~/.ssh/authorized_keys`
+1.1. make sure to connnect bastion -> worker node without passsword
+    #confirm accessing to `root` account
 1. create pull secret file
     `oc -n openshift-config get -o jsonpath='{.data.\.dockerconfigjson}' secret pull-secret | base64 -d | jq . |tee pull-secret.txt`
 1. create hosts file
@@ -268,7 +271,12 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 
     [new_workers]
     worker-2.oc4cluster.tetsuya.local
+    [new_workers:vars]
+    ansible_ssh_private_key_file=<private-key-location>
     ```
+    make sure to access to Worker node via ansible
+    `ansible new_workers -i inventory/hosts -m ping1`
+    
 1. exec playbook
 ```
 $ cd /usr/share/ansible/openshift-ansible
