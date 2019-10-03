@@ -228,6 +228,7 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 </details>
 
 ### Worker node
+*note: selinux stay enabled*
 1. create virtual machine for worker node you want to add in cluster
 1. install RHEL7.6
   - Lang: English
