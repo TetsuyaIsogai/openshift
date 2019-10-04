@@ -3,7 +3,7 @@ https://medium.com/@karansingh010/rook-ceph-deployment-on-openshift-4-2b34dfb6a4
 https://blog.openshift.com/rook-container-native-storage-openshift/
 https://github.com/rook/rook/blob/master/Documentation/openshift.md
 
-## Installation Steps
+## Ceph Operator Installation Steps
 *on worker node*
 * mkdir /var/lib/rook
 * mkdir /var/pv
@@ -110,12 +110,59 @@ spec:
 `oc create -f operator-openshift.yaml`
 --confirm
 ```
-[newgen@bastion01 ceph]$ oc get po
-NAME                                 READY   STATUS    RESTARTS   AGE
-rook-ceph-operator-dcbc78bcb-ddtbc   1/1     Running   0          23m
-rook-discover-g8g97                  1/1     Running   0          23m
-rook-discover-nqcdk                  1/1     Running   0          23m
-rook-discover-tf2b8                  1/1     Running   0          23m
+$ oc get all
+NAME                                     READY   STATUS    RESTARTS   AGE
+pod/rook-ceph-operator-dcbc78bcb-t6tkb   1/1     Running   0          47s
+pod/rook-discover-9c6f8                  1/1     Running   0          37s
+pod/rook-discover-cs24z                  1/1     Running   0          37s
+pod/rook-discover-snrh5                  1/1     Running   0          37s
+
+NAME                           DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/rook-discover   3         3         3       3            3           <none>          37s
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/rook-ceph-operator   1/1     1            1           26s
+
+NAME                                           DESIRED   CURRENT   READY   AGE
+replicaset.apps/rook-ceph-operator-dcbc78bcb   1         1         1       47s
 ```
-1. create object storage  
-`oc create -f object-openshift.yaml`
+
+## create cluster
+`$ oc create -f cluster.yaml`
+
+```
+$ oc get all
+NAME                                     READY   STATUS    RESTARTS   AGE
+pod/csi-cephfsplugin-dx4d9               3/3     Running   0          53s
+pod/csi-cephfsplugin-gmqvt               3/3     Running   0          53s
+pod/csi-cephfsplugin-gxrbq               3/3     Running   0          53s
+pod/csi-cephfsplugin-provisioner-0       4/4     Running   0          53s
+pod/csi-rbdplugin-n7wsh                  3/3     Running   0          53s
+pod/csi-rbdplugin-pm4tf                  3/3     Running   0          53s
+pod/csi-rbdplugin-provisioner-0          5/5     Running   0          53s
+pod/csi-rbdplugin-zdcz8                  3/3     Running   0          53s
+pod/rook-ceph-operator-dcbc78bcb-t6tkb   1/1     Running   0          2m21s
+pod/rook-discover-9c6f8                  1/1     Running   0          2m11s
+pod/rook-discover-cs24z                  1/1     Running   0          2m11s
+pod/rook-discover-snrh5                  1/1     Running   0          2m11s
+
+NAME                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+service/csi-cephfsplugin-metrics   ClusterIP   172.30.73.188   <none>        8080/TCP,8081/TCP   53s
+service/csi-rbdplugin-metrics      ClusterIP   172.30.180.11   <none>        8080/TCP,8081/TCP   53s
+
+NAME                              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/csi-cephfsplugin   3         3         3       3            3           <none>          53s
+daemonset.apps/csi-rbdplugin      3         3         3       3            3           <none>          54s
+daemonset.apps/rook-discover      3         3         3       3            3           <none>          2m11s
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/rook-ceph-operator   1/1     1            1           2m
+
+NAME                                           DESIRED   CURRENT   READY   AGE
+replicaset.apps/rook-ceph-operator-dcbc78bcb   1         1         1       2m21s
+
+NAME                                            READY   AGE
+statefulset.apps/csi-cephfsplugin-provisioner   1/1     53s
+statefulset.apps/csi-rbdplugin-provisioner      1/1     54s
+```
+
