@@ -1,5 +1,5 @@
 ## Links
-https://medium.com/@karansingh010/rook-ceph-deployment-on-openshift-4-2b34dfb6a442
+https://medium.com/@karansingh010/rook-ceph-deployment-on-openshift-4-2b34dfb6a442 # Followed this site
 https://blog.openshift.com/rook-container-native-storage-openshift/
 https://github.com/rook/rook/blob/master/Documentation/openshift.md
 
