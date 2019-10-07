@@ -5,164 +5,175 @@ https://github.com/rook/rook/blob/master/Documentation/openshift.md
 
 ## Ceph Operator Installation Steps
 *on worker node*
-* mkdir /var/lib/rook
-* mkdir /var/pv
-* chomod 777 /var/lib/rook
-* chmod 777 /var/pv
+1. add 100GB disk each node on vmware vspere  
+```
+before  
+[core@worker-0 ~]$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  120G  0 disk
+|-sda1   8:1    0    1M  0 part
+|-sda2   8:2    0    1G  0 part /boot
+`-sda3   8:3    0  119G  0 part /sysroot
+sr0     11:0    1 1024M  0 rom
+```
+```
+after  
+[core@worker-0 ~]$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  120G  0 disk
+|-sda1   8:1    0    1M  0 part
+|-sda2   8:2    0    1G  0 part /boot
+`-sda3   8:3    0  119G  0 part /sysroot
+sdb      8:16   0  100G  0 disk
+sr0     11:0    1 1024M  0 rom
+```
 
 *on bation node*
 1. Clone Repo
+#```
+#$ cd ~
+#$ git clone https://github.com/rook/rook.git
+#$ cd /rook/cluster/examples/kubernetes/ceph
+#```
 ```
-$ cd ~
-$ git clone https://github.com/rook/rook.git
-$ cd /rook/cluster/examples/kubernetes/ceph
+git clone https://github.com/ksingh7/ocp4-rook.git
+cd ocp4-rook/ceph/
 ```
-1. create project, serviceaccounts, rbac, etc  
-`oc create -f common.yaml`
-1. modify `operator-openshift.yaml`
+
+1. create SecurityContextConstraints 
+`oc create -f scc.yaml`
+1. create operator
+`oc create -f operator.yaml`
+1. create cluster
+`oc create -f cluster.yaml`
+
+## Confirmation Ceph Cluster
 ```
+$ oc exec -it rook-ceph-tools bash
+bash: warning: setlocale: LC_CTYPE: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_COLLATE: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_MESSAGES: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_NUMERIC: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_TIME: cannot change locale (en_US.UTF-8): No such file or directory
+[root@rook-ceph-tools /]#
+[root@rook-ceph-tools /]# ceph -s
+  cluster:
+    id:     aaf57b47-271b-4904-8ecc-2cc5d38fda4b
+    health: HEALTH_WARN
+            clock skew detected on mon.d, mon.g
+
+  services:
+    mon: 3 daemons, quorum f,d,g
+    mgr: a(active)
+    osd: 3 osds: 3 up, 3 in
+
+  data:
+    pools:   1 pools, 100 pgs
+    objects: 0  objects, 0 B
+    usage:   3.0 GiB used, 297 GiB / 300 GiB avail
+    pgs:     100 active+clean
+```
+
+## Confirmation from Pod
+mysql.yaml
+```
+$ cat mysql.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: wordpress
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rook-ceph-operator
-  namespace: rook-ceph
+  name: wordpress-mysql
   labels:
-    operator: rook
-    storage-backend: ceph
+    app: wordpress
+    tier: mysql
 spec:
   selector:
     matchLabels:
-      app: rook-ceph-operator
-  replicas: 1
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
-        app: rook-ceph-operator
+        app: wordpress
+        tier: mysql
     spec:
-      serviceAccountName: rook-ceph-system
       containers:
-      - name: rook-ceph-operator
-        image: rook/ceph:master
-        args: ["ceph", "operator"]
-        volumeMounts:
-        - mountPath: /var/lib/rook
-          name: rook-config
-        - mountPath: /etc/ceph
-          name: default-config-dir
+      - image: mysql:5.6
+        name: mysql
         env:
-        - name: ROOK_CURRENT_NAMESPACE_ONLY
-          value: "true"
-        - name: FLEXVOLUME_DIR_PATH
-          value: "/etc/kubernetes/kubelet-plugins/volume/exec"
-        - name: ROOK_ALLOW_MULTIPLE_FILESYSTEMS
-          value: "false"
-        - name: ROOK_LOG_LEVEL
-          value: "INFO"
-        - name: ROOK_MON_HEALTHCHECK_INTERVAL
-          value: "45s"
-        - name: ROOK_MON_OUT_TIMEOUT
-          value: "600s"
-        - name: ROOK_DISCOVER_DEVICES_INTERVAL
-          value: "60m"
-        - name: ROOK_HOSTPATH_REQUIRES_PRIVILEGED
-          value: "true"
-        - name: ROOK_ENABLE_SELINUX_RELABELING
-          value: "true"
-        - name: ROOK_ENABLE_FSGROUP
-          value: "true"
-        - name: ROOK_DISABLE_DEVICE_HOTPLUG
-          value: "false"
-        - name: ROOK_ENABLE_FLEX_DRIVER
-          value: "false"
-        - name: ROOK_ENABLE_DISCOVERY_DAEMON
-          value: "true"
-        - name: ROOK_ENABLE_MACHINE_DISRUPTION_BUDGET
-          value: "false"
-        - name: ROOK_CSI_ENABLE_CEPHFS
-          value: "true"
-        - name: ROOK_CSI_ENABLE_RBD
-          value: "true"
-        - name: ROOK_CSI_ENABLE_GRPC_METRICS
-          value: "true"
-        - name: ROOK_HOSTPATH_REQUIRES_PRIVILEGED
-          value: "true"
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
+        - name: MYSQL_ROOT_PASSWORD
+          value: changeme
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
       volumes:
-      - name: rook-config
-        hostPath:                 #modify emptydir -> hostPath
-          path: /var/pv/rook-config #modify emptydir -> hostPath
-      - name: default-config-dir
-        hostPath:                 #modify emptydir -> hostPath
-          path: /var/pv/rook-config-dir #modify emptydir -> hostPath
-```
-1. create operator  
-`oc create -f operator-openshift.yaml`
---confirm
-```
-$ oc get all
-NAME                                     READY   STATUS    RESTARTS   AGE
-pod/rook-ceph-operator-dcbc78bcb-t6tkb   1/1     Running   0          47s
-pod/rook-discover-9c6f8                  1/1     Running   0          37s
-pod/rook-discover-cs24z                  1/1     Running   0          37s
-pod/rook-discover-snrh5                  1/1     Running   0          37s
-
-NAME                           DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
-daemonset.apps/rook-discover   3         3         3       3            3           <none>          37s
-
-NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/rook-ceph-operator   1/1     1            1           26s
-
-NAME                                           DESIRED   CURRENT   READY   AGE
-replicaset.apps/rook-ceph-operator-dcbc78bcb   1         1         1       47s
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
 ```
 
-## create cluster
-`$ oc create -f cluster.yaml`
-
+1. Claim from pod
+`oc create -f mysql.yaml`
+1. confirm
+`oc get pods`
 ```
-$ oc get all
-NAME                                     READY   STATUS    RESTARTS   AGE
-pod/csi-cephfsplugin-dx4d9               3/3     Running   0          53s
-pod/csi-cephfsplugin-gmqvt               3/3     Running   0          53s
-pod/csi-cephfsplugin-gxrbq               3/3     Running   0          53s
-pod/csi-cephfsplugin-provisioner-0       4/4     Running   0          53s
-pod/csi-rbdplugin-n7wsh                  3/3     Running   0          53s
-pod/csi-rbdplugin-pm4tf                  3/3     Running   0          53s
-pod/csi-rbdplugin-provisioner-0          5/5     Running   0          53s
-pod/csi-rbdplugin-zdcz8                  3/3     Running   0          53s
-pod/rook-ceph-operator-dcbc78bcb-t6tkb   1/1     Running   0          2m21s
-pod/rook-discover-9c6f8                  1/1     Running   0          2m11s
-pod/rook-discover-cs24z                  1/1     Running   0          2m11s
-pod/rook-discover-snrh5                  1/1     Running   0          2m11s
+$ oc get pods
+NAME                                   READY   STATUS      RESTARTS   AGE
+rook-ceph-mgr-a-5b59cb7458-2q2gc       1/1     Running     0          103m
+rook-ceph-mon-d-6bf94599d6-pk5rr       1/1     Running     0          52m
+rook-ceph-mon-f-578c956465-w5rgv       1/1     Running     0          104m
+rook-ceph-mon-g-766c586468-hjd7d       1/1     Running     0          52m
+rook-ceph-osd-0-9bcf6d645-h8stn        1/1     Running     0          66m
+rook-ceph-osd-1-69bc54c4b5-5hqws       1/1     Running     0          52m
+rook-ceph-osd-2-6db8496845-whc5l       1/1     Running     0          101m
+rook-ceph-osd-prepare-worker-2-ptv2f   0/2     Completed   0          103m
+rook-ceph-tools                        1/1     Running     0          96m
+wordpress-mysql-6887bf844f-x6hwp       1/1     Running     0          3m45s
+```
 
-NAME                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
-service/csi-cephfsplugin-metrics   ClusterIP   172.30.73.188   <none>        8080/TCP,8081/TCP   53s
-service/csi-rbdplugin-metrics      ClusterIP   172.30.180.11   <none>        8080/TCP,8081/TCP   53s
+`oc get pvc`
+```
+$ oc get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+mysql-pv-claim   Bound    pvc-3e574ed7-e908-11e9-b9b7-005056b609c3   20Gi       RWO            rook-ceph-block   5m9s
+```
 
-NAME                              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
-daemonset.apps/csi-cephfsplugin   3         3         3       3            3           <none>          53s
-daemonset.apps/csi-rbdplugin      3         3         3       3            3           <none>          54s
-daemonset.apps/rook-discover      3         3         3       3            3           <none>          2m11s
-
-NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/rook-ceph-operator   1/1     1            1           2m
-
-NAME                                           DESIRED   CURRENT   READY   AGE
-replicaset.apps/rook-ceph-operator-dcbc78bcb   1         1         1       2m21s
-
-NAME                                            READY   AGE
-statefulset.apps/csi-cephfsplugin-provisioner   1/1     53s
-statefulset.apps/csi-rbdplugin-provisioner      1/1     54s
+`oc get pv`
+```
+$ oc get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                      STORAGECLASS      REASON   AGE
+pvc-3e574ed7-e908-11e9-b9b7-005056b609c3   20Gi       RWO            Delete           Bound    rook-ceph/mysql-pv-claim   rook-ceph-block            4m15s
 ```
 
