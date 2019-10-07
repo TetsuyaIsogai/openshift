@@ -5,20 +5,43 @@ https://github.com/rook/rook/blob/master/Documentation/openshift.md
 
 ## Ceph Operator Installation Steps
 *on worker node*
-* mkdir /var/lib/rook
-* mkdir /var/pv
-* chomod 777 /var/lib/rook
-* chmod 777 /var/pv
+1. add 100GB disk each node on vmware vspere  
+```
+before  
+[core@worker-0 ~]$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  120G  0 disk
+|-sda1   8:1    0    1M  0 part
+|-sda2   8:2    0    1G  0 part /boot
+`-sda3   8:3    0  119G  0 part /sysroot
+sr0     11:0    1 1024M  0 rom
+```
+```
+after  
+[core@worker-0 ~]$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  120G  0 disk
+|-sda1   8:1    0    1M  0 part
+|-sda2   8:2    0    1G  0 part /boot
+`-sda3   8:3    0  119G  0 part /sysroot
+sdb      8:16   0  100G  0 disk
+sr0     11:0    1 1024M  0 rom
+```
 
 *on bation node*
 1. Clone Repo
+#```
+#$ cd ~
+#$ git clone https://github.com/rook/rook.git
+#$ cd /rook/cluster/examples/kubernetes/ceph
+#```
 ```
-$ cd ~
-$ git clone https://github.com/rook/rook.git
-$ cd /rook/cluster/examples/kubernetes/ceph
+git clone https://github.com/ksingh7/ocp4-rook.git
+cd ocp4-rook/ceph/
 ```
-1. create project, serviceaccounts, rbac, etc  
-`oc create -f common.yaml`
+
+1. create SecurityContextConstraints 
+`oc create -f scc.yaml`
 1. modify `operator-openshift.yaml`
 ```
 apiVersion: apps/v1
