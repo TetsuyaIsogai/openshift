@@ -198,8 +198,10 @@ directory tree after executing `./openshift-install create ignition-configs --di
 ```
 
 ## Upload bootstrap.ign to web server
-$ cp bootstrap.ign <webserver-publish-directory>
-$ curl http://<hostname>:<port>/<webserver-publish-directory>
+```
+$ cp bootstrap.ign <<webserver-publish-directory>>
+$ curl http://<<hostname>>:<<port>>/<<webserver-publish-directory>>
+```
 
 ## append-bootstrap.ign
 ```
