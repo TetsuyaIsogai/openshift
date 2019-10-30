@@ -158,6 +158,7 @@ platform:
     defaultDatastore: datastore1
 pullSecret: '{"auths": ...'   # ' is mandatory, don't forget
 sshKey: 'ssh-rsa AAAA ...'    # ' is mandatory. don't forget
+※ここにプロキシ設定をたすこと！必須です！
 
 ```
 Files after executing `./openshift-install create manifests --dir=/home/newgen/ocp42`  
