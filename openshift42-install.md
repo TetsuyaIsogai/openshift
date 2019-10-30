@@ -1,10 +1,15 @@
+## Manual
+https://docs.openshift.com/container-platform/4.2/installing/installing_vsphere/installing-vsphere.html
+https://rheb.hatenablog.com/entry/openshift41-baremetal-upi
+https://rheb.hatenablog.com/entry/openshift42-proxy-upi
+https://rheb.hatenablog.com/entry/openshift42-upi-update
+
 ## Prerequisite
 - ESX 6.7 U2 or later
 - Server resource
-  - 1 bootstrap machine
-  - 3 Master node
-  - 3 worker node
-
+  - 1 bootstrap machine(4 Core / 16 GB Mem / 120 GB Disk)
+  - 3 Master node(4 Core / 16 GB Mem / 120 GB Disk)
+  - 3 worker node(2 Core / 8 GB Mem / 120 GB Disk)
 
 ## Download
 https://cloud.redhat.com/openshift/install/vsphere/user-provisioned
@@ -158,9 +163,12 @@ platform:
     defaultDatastore: datastore1
 pullSecret: '{"auths": ...'   # ' is mandatory, don't forget
 sshKey: 'ssh-rsa AAAA ...'    # ' is mandatory. don't forget
-※ここにプロキシ設定をたすこと！必須です！
-
+proxy:
+  httpProxy: http://10.0.0.254:3128
+  httpsProxy: http://10.0.0.254:3128
+  noProxy: tetsuya.local,10.0.0.0/16
 ```
+
 Files after executing `./openshift-install create manifests --dir=/home/newgen/ocp42`  
 ```
 04-openshift-machine-config-operator.yaml  cluster-network-02-config.yml     etcd-host-service.yaml                 etcd-signer-secret.yaml
@@ -172,7 +180,7 @@ cluster-ingress-02-config.yml              etcd-client-secret.yaml           etc
 cluster-network-01-crd.yml                 etcd-host-service-endpoints.yaml  etcd-serving-ca-configmap.yaml
 ```
 
-Directories after executing `./openshift-install create ignition-configs --dir=/home/newgen/ocp42`  
+directory tree after executing `./openshift-install create ignition-configs --dir=/home/newgen/ocp42`  
 ```
 .
 ├── README.md
@@ -188,6 +196,10 @@ Directories after executing `./openshift-install create ignition-configs --dir=/
 ├── pull-secret.txt
 └── worker.ign
 ```
+
+## Upload bootstrap.ign to web server
+$ cp bootstrap.ign <webserver-publish-directory>
+$ curl http://<hostname>:<port>/<webserver-publish-directory>
 
 ## append-bootstrap.ign
 ```
@@ -211,17 +223,24 @@ $ cat append-bootstrap.ign
   "systemd": {}
 }
 ```
+## base64 encode ignition files to inject to VM
+$ base64 -w0 <installation_directory>/master.ign > <installation_directory>/master.64
+$ base64 -w0 <installation_directory>/worker.ign > <installation_directory>/worker.64
+$ base64 -w0 <installation_directory>/append-bootstrap.ign > <installation_directory>/append-bootstrap.64
+** Use these base64 files later to set VM's parameter
 
-## OVA 
+## OVA / VM settings
 1. Deploy OVA file
 1. Clone OVA to Virtual Machine
 1. Edit Virtual Hardware Options, add parameter (base64)
 1. Edit Memory, Disk, CPU size appropriatly each machine
    Note: Memory reservation is needed
 1. Edit MAC address adjust with `dnsmasq.conf`
+1. Set ignition config parameter to the VM
 1. Boot the virtual Machines
+1. Repeat each machines
 
-
+** When login screen doesn't bring up, you should delete the virtual machine and restart "Clone OVA to Vritual Machine"
 
 ## Install openshift client
 $ tar xvf openshift-client-linux-4.2.0.tar.gz
@@ -229,9 +248,21 @@ $ sudo mv oc /usr/bin/oc
 $ oc version
 Client Version: openshift-clients-4.2.0-201910041700
 
-## Create Cluster
-$ openshift-install --dir=/home/newgen/ocp42 wait-for bootstrap-complete --log-level=info
+$ export KUBECONFIG=<installation_directory>/auth/kubeconfig
+$ oc get nodes
+
+
+## Set persitent volume for image-registry
+** For Non-production
+$ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+
+
+## Confirm the Cluster is up
+$ ./openshift-install --dir=/home/newgen/ocp42 wait-for bootstrap-complete --log-level=info
 INFO Waiting up to 30m0s for the Kubernetes API at https://api.oc4cluster.tetsuya.local:6443...
+INFO API v1.14.6+2e5ed54 up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+INFO It is now safe to remove the bootstrap resources
 
 ## Troubleshooting
 $ ssh core@bootstrap -i .ssh/ocp42_rsa
