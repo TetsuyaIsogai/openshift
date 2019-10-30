@@ -43,7 +43,8 @@ dhcp-host=00:50:56:b6:09:c7,worker-2,10.0.1.112
 dhcp-option=option:dns-server,10.0.1.10
 dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases
 srv-host=_etcd-server-ssl._tcp.oc4cluster.tetsuya.local,etcd-0.oc4cluster.tetsuya.local,2380,0,10
-srv-host=_etcd-server-ssl._tcp.oc4cluster.tetsuya.local,etcd-1.oc4cluster.tetsuya.local,2380,0,10
+srv-host=_etcd-server-ssl._tcp.oc4cluster.tetsuya.local,etcd-1.o
+cac4cluster.tetsuya.local,2380,0,10
 srv-host=_etcd-server-ssl._tcp.oc4cluster.tetsuya.local,etcd-2.oc4cluster.tetsuya.local,2380,0,10
 log-dhcp
 log-facility=/var/log/dnsmasq.log
@@ -187,9 +188,53 @@ Directories after executing `./openshift-install create ignition-configs --dir=/
 └── worker.ign
 ```
 
+## append-bootstrap.ign
+```
+$ cat append-bootstrap.ign
+{
+  "ignition": {
+    "config": {
+      "append": [
+        {
+          "source": "http://10.0.1.10:8008/ocp/rhcos/ignitions/bootstrap.ign",
+          "verification": {}
+        }
+      ]
+    },
+    "timeouts": {},
+    "version": "2.1.0"
+  },
+  "networkd": {},
+  "passwd": {},
+  "storage": {},
+  "systemd": {}
+}
+```
+
 ## OVA 
 1. Deploy OVA file
 1. Clone OVA to Virtual Machine
 1. Edit Virtual Hardware Options, add parameter (base64)
 1. Edit Memory, Disk, CPU size appropriatly each machine
    Note: Memory reservation is needed
+1. Edit MAC address adjust with `dnsmasq.conf`
+1. Boot the virtual Machines
+
+
+
+## Install openshift client
+$ tar xvf openshift-client-linux-4.2.0.tar.gz
+$ sudo mv oc /usr/bin/oc
+$ oc version
+Client Version: openshift-clients-4.2.0-201910041700
+
+## Create Cluster
+$ openshift-install --dir=/home/newgen/ocp42 wait-for bootstrap-complete --log-level=info
+INFO Waiting up to 30m0s for the Kubernetes API at https://api.oc4cluster.tetsuya.local:6443...
+
+## Troubleshooting
+$ ssh core@bootstrap -i .ssh/ocp42_rsa
+[core@bootstrap ~]$ journalctl -b -f -u bootkube.service
+
+
+
