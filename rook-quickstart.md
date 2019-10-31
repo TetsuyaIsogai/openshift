@@ -1,5 +1,5 @@
 ## Links
-https://medium.com/@karansingh010/rook-ceph-deployment-on-openshift-4-2b34dfb6a442 # Followed this site
+https://medium.com/@karansingh010/rook-ceph-deployment-on-openshift-4-2b34dfb6a442
 https://blog.openshift.com/rook-container-native-storage-openshift/
 https://github.com/rook/rook/blob/master/Documentation/openshift.md
 
@@ -31,50 +31,216 @@ sr0     11:0    1 1024M  0 rom
 *on bation node*
 1. Clone Repo
 ```
-#$ cd ~
-#$ git clone https://github.com/rook/rook.git
-#$ cd /rook/cluster/examples/kubernetes/ceph
-```
-  
-```
-git clone https://github.com/ksingh7/ocp4-rook.git
-cd ocp4-rook/ceph/
+$ cd ~
+$ git clone https://github.com/rook/rook.git
+$ cd /rook/cluster/examples/kubernetes/ceph
 ```
 
-1. create SecurityContextConstraints 
-`oc create -f scc.yaml`
-1. create operator
-`oc create -f operator.yaml`
+1. create CRD/RBAC/SA 
+`oc create -f common.yaml`
+1. create operator and Security Constraints
+`oc create -f operator-openshift.yaml`
+wait for creating operator
+```
+$ oc get all
+NAME                                      READY   STATUS    RESTARTS   AGE
+pod/rook-ceph-operator-579b654999-ngc77   1/1     Running   0          31m
+pod/rook-discover-2ddrw                   1/1     Running   0          19m
+pod/rook-discover-4z6s4                   1/1     Running   0          19m
+pod/rook-discover-6bbjg                   1/1     Running   0          19m
+
+NAME                           DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/rook-discover   3         3         3       3            3           <none>          19m
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/rook-ceph-operator   1/1     1            1           31m
+
+NAME                                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/rook-ceph-operator-579b654999   1         1         1       31m
+```
+
 1. create cluster
 `oc create -f cluster.yaml`
-
-## Confirm Ceph Cluster
-
 ```
-$ oc exec -it rook-ceph-tools bash
-bash: warning: setlocale: LC_CTYPE: cannot change locale (en_US.UTF-8): No such file or directory
-bash: warning: setlocale: LC_COLLATE: cannot change locale (en_US.UTF-8): No such file or directory
-bash: warning: setlocale: LC_MESSAGES: cannot change locale (en_US.UTF-8): No such file or directory
-bash: warning: setlocale: LC_NUMERIC: cannot change locale (en_US.UTF-8): No such file or directory
-bash: warning: setlocale: LC_TIME: cannot change locale (en_US.UTF-8): No such file or directory
-[root@rook-ceph-tools /]#
-[root@rook-ceph-tools /]# ceph -s
+$ oc get all
+NAME                                                READY   STATUS      RESTARTS   AGE
+pod/csi-cephfsplugin-j6v95                          3/3     Running     0          20m
+pod/csi-cephfsplugin-jkjg6                          3/3     Running     0          20m
+pod/csi-cephfsplugin-p959d                          3/3     Running     0          20m
+pod/csi-cephfsplugin-provisioner-78d9994b5d-54xqp   4/4     Running     0          20m
+pod/csi-cephfsplugin-provisioner-78d9994b5d-bxf6t   4/4     Running     0          20m
+pod/csi-rbdplugin-8cwcp                             3/3     Running     0          20m
+pod/csi-rbdplugin-gpkls                             3/3     Running     0          20m
+pod/csi-rbdplugin-provisioner-9d99b58f6-blbq4       5/5     Running     0          20m
+pod/csi-rbdplugin-provisioner-9d99b58f6-xs55m       5/5     Running     0          20m
+pod/csi-rbdplugin-x5hzq                             3/3     Running     0          20m
+pod/rook-ceph-mgr-a-7c9864f9b8-hxltx                1/1     Running     0          14m
+pod/rook-ceph-mon-a-57785bb7fb-nxw5r                1/1     Running     0          18m
+pod/rook-ceph-mon-b-6cf8f7cfdb-7v4qw                1/1     Running     0          17m
+pod/rook-ceph-mon-c-8549499ccf-hd4xm                1/1     Running     0          17m
+pod/rook-ceph-operator-579b654999-ngc77             1/1     Running     0          52m
+pod/rook-ceph-osd-0-6986dd69dd-nt6jg                1/1     Running     0          13m
+pod/rook-ceph-osd-1-6967b4b59c-9gp8b                1/1     Running     0          13m
+pod/rook-ceph-osd-2-f885db75-89f6p                  1/1     Running     0          13m
+pod/rook-ceph-osd-prepare-worker-0-jb5pw            0/1     Completed   0          14m
+pod/rook-ceph-osd-prepare-worker-1-bn2s5            0/1     Completed   0          14m
+pod/rook-ceph-osd-prepare-worker-2-q8xq7            0/1     Completed   0          14m
+pod/rook-ceph-tools-5f5dc75fd5-jhkc8                1/1     Running     0          12m
+pod/rook-discover-2ddrw                             1/1     Running     0          40m
+pod/rook-discover-4z6s4                             1/1     Running     0          40m
+pod/rook-discover-6bbjg                             1/1     Running     0          40m
+
+NAME                               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+service/csi-cephfsplugin-metrics   ClusterIP   172.30.133.52    <none>        8080/TCP,8081/TCP   20m
+service/csi-rbdplugin-metrics      ClusterIP   172.30.28.95     <none>        8080/TCP,8081/TCP   20m
+service/rook-ceph-mgr              ClusterIP   172.30.54.215    <none>        9283/TCP            14m
+service/rook-ceph-mgr-dashboard    ClusterIP   172.30.93.0      <none>        8443/TCP            14m
+service/rook-ceph-mon-a            ClusterIP   172.30.167.156   <none>        6789/TCP,3300/TCP   18m
+service/rook-ceph-mon-b            ClusterIP   172.30.65.55     <none>        6789/TCP,3300/TCP   17m
+service/rook-ceph-mon-c            ClusterIP   172.30.145.16    <none>        6789/TCP,3300/TCP   17m
+
+NAME                              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/csi-cephfsplugin   3         3         3       3            3           <none>          20m
+daemonset.apps/csi-rbdplugin      3         3         3       3            3           <none>          20m
+daemonset.apps/rook-discover      3         3         3       3            3           <none>          40m
+
+NAME                                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/csi-cephfsplugin-provisioner   2/2     2            2           20m
+deployment.apps/csi-rbdplugin-provisioner      2/2     2            2           20m
+deployment.apps/rook-ceph-mgr-a                1/1     1            1           14m
+deployment.apps/rook-ceph-mon-a                1/1     1            1           18m
+deployment.apps/rook-ceph-mon-b                1/1     1            1           17m
+deployment.apps/rook-ceph-mon-c                1/1     1            1           17m
+deployment.apps/rook-ceph-operator             1/1     1            1           52m
+deployment.apps/rook-ceph-osd-0                1/1     1            1           13m
+deployment.apps/rook-ceph-osd-1                1/1     1            1           13m
+deployment.apps/rook-ceph-osd-2                1/1     1            1           13m
+deployment.apps/rook-ceph-tools                1/1     1            1           12m
+
+NAME                                                      DESIRED   CURRENT   READY   AGE
+replicaset.apps/csi-cephfsplugin-provisioner-78d9994b5d   2         2         2       20m
+replicaset.apps/csi-rbdplugin-provisioner-9d99b58f6       2         2         2       20m
+replicaset.apps/rook-ceph-mgr-a-7c9864f9b8                1         1         1       14m
+replicaset.apps/rook-ceph-mon-a-57785bb7fb                1         1         1       18m
+replicaset.apps/rook-ceph-mon-b-6cf8f7cfdb                1         1         1       17m
+replicaset.apps/rook-ceph-mon-c-8549499ccf                1         1         1       17m
+replicaset.apps/rook-ceph-operator-579b654999             1         1         1       52m
+replicaset.apps/rook-ceph-osd-0-6986dd69dd                1         1         1       13m
+replicaset.apps/rook-ceph-osd-1-6967b4b59c                1         1         1       13m
+replicaset.apps/rook-ceph-osd-2-f885db75                  1         1         1       13m
+replicaset.apps/rook-ceph-tools-5f5dc75fd5                1         1         1       12m
+
+NAME                                       COMPLETIONS   DURATION   AGE
+job.batch/rook-ceph-osd-prepare-worker-0   1/1           36s        14m
+job.batch/rook-ceph-osd-prepare-worker-1   1/1           36s        14m
+job.batch/rook-ceph-osd-prepare-worker-2   1/1           41s        14m
+```
+## Confirm Ceph Cluster
+### Install toolbox
+`oc create -f toolbox.yaml`  
+
+### Confrim Health State
+```
+$ oc rsh pod/rook-ceph-tools-5f5dc75fd5-jhkc8
+sh-4.2#
+sh-4.2# ceph -s
   cluster:
-    id:     aaf57b47-271b-4904-8ecc-2cc5d38fda4b
+    id:     26231080-d9c5-4027-bd61-397d5e8c191c
     health: HEALTH_WARN
-            clock skew detected on mon.d, mon.g
+            clock skew detected on mon.b, mon.c
 
   services:
-    mon: 3 daemons, quorum f,d,g
-    mgr: a(active)
-    osd: 3 osds: 3 up, 3 in
+    mon: 3 daemons, quorum a,b,c (age 4m)
+    mgr: a(active, since 3m)
+    osd: 3 osds: 3 up (since 2m), 3 in (since 2m)
 
   data:
-    pools:   1 pools, 100 pgs
-    objects: 0  objects, 0 B
-    usage:   3.0 GiB used, 297 GiB / 300 GiB avail
-    pgs:     100 active+clean
+    pools:   0 pools, 0 pgs
+    objects: 0 objects, 0 B
+    usage:   3.0 GiB used, 114 GiB / 117 GiB avail
+    pgs:
 ```
+## Create StraogeClass
+/rook/cluster/examples/kubernetes/ceph/csi/rbd/storageclass.yaml
+```
+$ cat storageclass.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  failureDomain: host
+  replicated:
+    size: 3
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+   name: rook-ceph-block
+provisioner: rook-ceph.rbd.csi.ceph.com
+parameters:
+    # clusterID is the namespace where the rook cluster is running
+    # If you change this namespace, also change the namespace below where the secret namespaces are defined
+    clusterID: rook-ceph
+
+    # Ceph pool into which the RBD image shall be created
+    pool: replicapool
+
+    # RBD image format. Defaults to "2".
+    imageFormat: "2"
+
+    # RBD image features. Available for imageFormat: "2". CSI RBD currently supports only `layering` feature.
+    imageFeatures: layering
+
+    # The secrets contain Ceph admin credentials. These are generated automatically by the operator
+    # in the same namespace as the cluster.
+    csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+    csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+    csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+    csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+    # Specify the filesystem type of the volume. If not specified, csi-provisioner
+    # will set default as `ext4`.
+    csi.storage.k8s.io/fstype: ext4
+# uncomment the following to use rbd-nbd as mounter on supported nodes
+#mounter: rbd-nbd
+reclaimPolicy: Delete
+
+```
+```
+$ oc create -f storageclass.yaml
+cephblockpool.ceph.rook.io/replicapool created
+storageclass.storage.k8s.io/rook-ceph-block created
+$ oc get sc
+NAME              PROVISIONER                    AGE
+rook-ceph-block   rook-ceph.rbd.csi.ceph.com     27s
+```
+
+## Confirm PVC
+```
+$ oc project sample1
+Now using project "sample1" on server "https://api.oc4cluster.tetsuya.local:6443".
+** Change namespace 
+
+$ cat pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: samplepvc
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Mi
+```
+```
+$ oc get pvc
+NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+samplepvc   Bound    pvc-b9dae451-fbb5-11e9-aa53-005056b609c2   200Mi      RWO            rook-ceph-block   4s
+```
+
 
 ## Confirm from Pod
 mysql.yaml
