@@ -55,11 +55,13 @@ log-dhcp
 log-facility=/var/log/dnsmasq.log
 conf-dir=/etc/dnsmasq.d,.rpmnew,.rpmsave,.rpmorig
 ```
-** Acceptable Mac address in vSphere is 
+** Acceptable Mac address in vSphere is
+```
 00:05:69:00:00:00 to 00:05:69:FF:FF:FF
 00:0c:29:00:00:00 to 00:0c:29:FF:FF:FF
 00:1c:14:00:00:00 to 00:1c:14:FF:FF:FF
 00:50:56:00:00:00 to 00:50:56:FF:FF:FF
+```
 
 - DNS entries
 ```
