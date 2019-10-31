@@ -256,8 +256,9 @@ $ oc get nodes
 
 ## Set persitent volume for image-registry
 ** For Non-production
+```
 $ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
-
+```
 
 ## Confirm the Cluster is up
 $ ./openshift-install --dir=/home/newgen/ocp42 wait-for bootstrap-complete --log-level=info
