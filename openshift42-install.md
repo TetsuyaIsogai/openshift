@@ -245,6 +245,7 @@ $ base64 -w0 <installation_directory>/append-bootstrap.ign > <installation_direc
 ** When login screen doesn't bring up, you should delete the virtual machine and restart "Clone OVA to Vritual Machine"
 
 ## Install openshift client
+```
 $ tar xvf openshift-client-linux-4.2.0.tar.gz
 $ sudo mv oc /usr/bin/oc
 $ oc version
@@ -252,7 +253,7 @@ Client Version: openshift-clients-4.2.0-201910041700
 
 $ export KUBECONFIG=<installation_directory>/auth/kubeconfig
 $ oc get nodes
-
+```
 
 ## Set persitent volume for image-registry
 ** For Non-production
@@ -261,15 +262,18 @@ $ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --pa
 ```
 
 ## Confirm the Cluster is up
+```
 $ ./openshift-install --dir=/home/newgen/ocp42 wait-for bootstrap-complete --log-level=info
 INFO Waiting up to 30m0s for the Kubernetes API at https://api.oc4cluster.tetsuya.local:6443...
 INFO API v1.14.6+2e5ed54 up
 INFO Waiting up to 30m0s for bootstrapping to complete...
 INFO It is now safe to remove the bootstrap resources
+```
 
 ## Troubleshooting
+```
 $ ssh core@bootstrap -i .ssh/ocp42_rsa
 [core@bootstrap ~]$ journalctl -b -f -u bootkube.service
-
+```
 
 
