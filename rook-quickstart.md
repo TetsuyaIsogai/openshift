@@ -34,7 +34,8 @@ sr0     11:0    1 1024M  0 rom
 #$ cd ~
 #$ git clone https://github.com/rook/rook.git
 #$ cd /rook/cluster/examples/kubernetes/ceph
-```
+#```
+
 ```
 git clone https://github.com/ksingh7/ocp4-rook.git
 cd ocp4-rook/ceph/
@@ -47,7 +48,8 @@ cd ocp4-rook/ceph/
 1. create cluster
 `oc create -f cluster.yaml`
 
-## Confirmation Ceph Cluster
+## Confirm Ceph Cluster
+
 ```
 $ oc exec -it rook-ceph-tools bash
 bash: warning: setlocale: LC_CTYPE: cannot change locale (en_US.UTF-8): No such file or directory
@@ -74,7 +76,7 @@ bash: warning: setlocale: LC_TIME: cannot change locale (en_US.UTF-8): No such f
     pgs:     100 active+clean
 ```
 
-## Confirmation from Pod
+## Confirm from Pod
 mysql.yaml
 ```
 $ cat mysql.yaml
