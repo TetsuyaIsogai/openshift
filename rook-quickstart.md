@@ -34,7 +34,7 @@ sr0     11:0    1 1024M  0 rom
 #$ cd ~
 #$ git clone https://github.com/rook/rook.git
 #$ cd /rook/cluster/examples/kubernetes/ceph
-#```
+```
 ```
 git clone https://github.com/ksingh7/ocp4-rook.git
 cd ocp4-rook/ceph/
