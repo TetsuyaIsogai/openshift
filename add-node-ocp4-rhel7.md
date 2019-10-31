@@ -9,7 +9,7 @@
 ## Bastion node
 1. Subscription manager register
 ```
-[root@worker-2 ~]# subscription-manager register --username=tty1028 --password=FU62iNc-iiK679u
+[root@worker-2 ~]# subscription-manager register --username=<user> --password=<password>
 登録中: subscription.rhsm.redhat.com:443/subscription
 このシステムは、次の ID で登録されました: b372a5c7-e93a-40b3-88ad-62668a71e95e
 登録したシステム名: worker-2
