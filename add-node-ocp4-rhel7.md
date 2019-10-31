@@ -1,9 +1,10 @@
 ## Prerequisite
-- use same machine to execute 
+- use same machine to execute  as creating cluster (bastion node)
 
 ## Procedure
 ### Outside of the cluster
-1. Add dhcp entry in dnsmasq
+- Add dhcp entry in dnsmasq
+- Add host entry in haproxy
 
 ## Bastion node
 1. Subscription manager register
@@ -227,7 +228,7 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 
 </details>
 
-### Worker node
+### Worker node settings
 *note: selinux stay enabled*
 1. create virtual machine for worker node you want to add in cluster
 1. install RHEL7.6
@@ -254,11 +255,11 @@ rhel-7-server-ose-4.1-rpms/x86_64/productid                                     
 ```
 ### Add Worker node
 #### on bastion node
-1. configure ssh public key access bastion to worker
-    From Worker node: `mkdir ~/.ssh; chmod 700 .ssh`
-    From bastion node: `scp <public-key> root@<new-worker>:~/.ssh/authorized_keys`
-1.1. make sure to connnect bastion -> worker node without passsword
-    #confirm accessing to `root` account
+1. configure ssh public key access bastion to worker  
+    From Worker node: `mkdir ~/.ssh; chmod 700 .ssh`  
+    From bastion node: `scp <public-key> root@<new-worker>:~/.ssh/authorized_keys`  
+1.1. make sure to connnect bastion -> worker node without passsword  
+    #confirm accessing to `root` account with sudo
 1. create pull secret file
     `oc -n openshift-config get -o jsonpath='{.data.\.dockerconfigjson}' secret pull-secret | base64 -d | jq . |tee pull-secret.txt`
 1. create hosts file
@@ -296,9 +297,9 @@ worker-1   Ready    worker   40d    v1.13.4+d81afa6ba
 worker-2   Ready    worker   3m9s   v1.13.4+12ee15d4a
 ```
 
-
 Links
-赤帽エンジニアブログ https://rheb.hatenablog.com/entry/openshift41-baremetal-upi
+赤帽エンジニアブログ  
+https://rheb.hatenablog.com/entry/openshift41-baremetal-upi
 
 Add RHEL 7 worker node
 https://docs.openshift.com/container-platform/4.1/machine_management/adding-rhel-compute.html
