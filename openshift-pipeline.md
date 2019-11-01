@@ -26,4 +26,8 @@ $ oc apply --filename https://storage.googleapis.com/tekton-releases/latest/rele
 1. Confirmation
 ```
 $ oc get pods -n tekton-pipelines
+NAME                                           READY   STATUS    RESTARTS   AGE
+tekton-pipelines-controller-669dfb5dd4-jld8p   1/1     Running   0          96s
+tekton-pipelines-webhook-5669b89c9c-dl9t4      1/1     Running   0          96s
+
 ```
