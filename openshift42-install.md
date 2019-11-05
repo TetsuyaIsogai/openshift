@@ -256,6 +256,10 @@ Client Version: openshift-clients-4.2.0-201910041700
 $ export KUBECONFIG=<installation_directory>/auth/kubeconfig
 $ oc get nodes
 ```
+(Optional) install podman command
+```
+$ sudo yum install podman
+```
 
 ## Set persitent volume for image-registry
 ** For Non-production
