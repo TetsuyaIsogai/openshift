@@ -71,3 +71,18 @@ podman run --name poc-registry -p 5000:5000 \
 -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \
 docker.io/library/registry:2
 ```
+* Run regsitry process foreground *
+1. Confirm access to registry
+```
+curl -u admin:password -k https://registry.oc4cluster.tetsuya.local:5000/v2/_catalog
+```
+
+## Tips
+- Stop registry
+```
+podman stop poc-regstry
+```
+- Start registry
+```
+podman start poc-regstry
+```
