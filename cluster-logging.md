@@ -169,4 +169,36 @@ spec:
       fluentd: {}
 ```
 1. Click `Create`
-
+```
+$ oc get clusterlogging instance -oyaml
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogging
+metadata:
+  creationTimestamp: "2019-11-26T07:37:21Z"
+  generation: 1
+  name: instance
+  namespace: openshift-logging
+  resourceVersion: "17567630"
+  selfLink: /apis/logging.openshift.io/v1/namespaces/openshift-logging/clusterloggings/instance
+  uid: 9496426c-101f-11ea-aaa2-005056b609c3
+spec:
+  collection:
+    logs:
+      fluentd: {}
+      type: fluentd
+  curation:
+    curator:
+      schedule: 30 3 * * *
+    type: curator
+  logStore:
+    elasticsearch:
+      nodeCount: 3
+      redundancyPolicy: ZeroRedundancy
+      storage: {}
+    type: elasticsearch
+  managementState: Managed
+  visualization:
+    kibana:
+      replicas: 1
+    type: kibana
+```
