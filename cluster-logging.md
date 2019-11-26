@@ -260,3 +260,25 @@ spec:
       replicas: 1
     type: kibana
 ```
+
+↓Fail
+```
+$ oc get pods
+NAME                                            READY   STATUS        RESTARTS   AGE
+cluster-logging-operator-f5c55f79c-2d5d7        0/1     Terminating   0          25m
+cluster-logging-operator-f5c55f79c-55mx6        1/1     Running       0          19m
+elasticsearch-cdm-usj0hoy0-1-dcbcf5969-7j7lt    0/2     Terminating   0          25m
+elasticsearch-cdm-usj0hoy0-1-dcbcf5969-fjrc4    1/2     Running       0          19m
+elasticsearch-cdm-usj0hoy0-2-8fc7dbd75-7jzjg    1/2     Terminating   0          114m
+elasticsearch-cdm-usj0hoy0-2-8fc7dbd75-b52xq    2/2     Terminating   0          43m
+elasticsearch-cdm-usj0hoy0-2-8fc7dbd75-ct6hp    0/2     Pending       0          10m
+elasticsearch-cdm-usj0hoy0-3-86c85998ff-l48z5   1/2     Terminating   0          114m
+elasticsearch-cdm-usj0hoy0-3-86c85998ff-zlk6j   1/2     Running       0          25m
+fluentd-8pqgn                                   1/1     Running       0          3h2m
+fluentd-9kxfp                                   1/1     Running       0          3h2m
+fluentd-bkx95                                   1/1     Running       0          3h2m
+fluentd-cjjcb                                   1/1     Running       0          3h2m
+fluentd-sj5l6                                   1/1     Running       0          3h2m
+fluentd-xr2cd                                   1/1     Running       0          3h2m
+kibana-84cdbf9cbd-bc6z9                         2/2     Running       0          25m
+```
