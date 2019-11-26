@@ -1,5 +1,6 @@
 ## Link
 https://docs.openshift.com/container-platform/4.2/logging/cluster-logging-deploying.html
+https://docs.openshift.com/container-platform/4.1/logging/config/efk-logging-elasticsearch.html
 
 
 ## Prerequisite
