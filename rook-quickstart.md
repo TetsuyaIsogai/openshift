@@ -406,4 +406,16 @@ POOLS:
     myfs-metadata      2     2.2 KiB          22     1.5 MiB         0       127 GiB
     myfs-data0         3         0 B           0         0 B         0       127 GiB
 ```
+## Create storageClass for Filesystem
+```
+$ cd rook/cluster/examples/kubernetes/ceph/csi/cephfs
+$ oc create -f storageclass.yaml
+storageclass.storage.k8s.io/csi-cephfs created
+$ oc get sc
+NAME                        PROVISIONER                     AGE
+csi-cephfs                  rook-ceph.cephfs.csi.ceph.com   2s
+rook-ceph-block (default)   rook-ceph.rbd.csi.ceph.com      25d
+thin                        kubernetes.io/vsphere-volume    26d
+```
+
 
