@@ -150,11 +150,16 @@ spec:
   logStore:
     type: elasticsearch
     elasticsearch:
+      resources:
+        limits:
+          cpu: "4000m"
+          memory: "4Gi"
+        requests:
+          cpu: "100m"
+          memory: "1Gi"
       nodeCount: 3
-      redundancyPolicy: SingleRedundancy
-      storage:
-        storageClassName: rook-ceph-block
-        size: 20G
+      redundancyPolicy: ZeroRedundancy
+      storage: {}
   visualization:
     type: kibana
     kibana:
@@ -169,6 +174,9 @@ spec:
       fluentd: {}
 ```
 1. Click `Create`
+
+
+↓Fail
 ```
 $ oc get clusterlogging instance -oyaml
 apiVersion: logging.openshift.io/v1
