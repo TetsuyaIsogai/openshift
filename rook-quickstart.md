@@ -344,4 +344,49 @@ $ oc get pv
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                      STORAGECLASS      REASON   AGE
 pvc-3e574ed7-e908-11e9-b9b7-005056b609c3   20Gi       RWO            Delete           Bound    rook-ceph/mysql-pv-claim   rook-ceph-block            4m15s
 ```
+## Create Filesystem
+Before
+```
+$ oc rsh pod/rook-ceph-tools-5f5dc75fd5-jhkc8
+sh-4.2#
+sh-4.2# ceph -s
+  cluster:
+    id:     26231080-d9c5-4027-bd61-397d5e8c191c
+    health: HEALTH_WARN
+            too few PGs per OSD (4 < min 30)
+            clock skew detected on mon.b, mon.c
 
+  services:
+    mon: 3 daemons, quorum a,b,c (age 3w)
+    mgr: a(active, since 2w)
+    osd: 6 osds: 6 up (since 2w), 6 in (since 2w)
+
+  data:
+    pools:   1 pools, 8 pgs
+    objects: 109 objects, 288 MiB
+    usage:   6.9 GiB used, 407 GiB / 414 GiB avail
+    pgs:     8 active+clean
+
+sh-4.2#
+sh-4.2# ceph df
+RAW STORAGE:
+    CLASS     SIZE        AVAIL       USED        RAW USED     %RAW USED
+    hdd       414 GiB     407 GiB     894 MiB      6.9 GiB          1.66
+    TOTAL     414 GiB     407 GiB     894 MiB      6.9 GiB          1.66
+
+POOLS:
+    POOL            ID     STORED      OBJECTS     USED        %USED     MAX AVAIL
+    replicapool      1     263 MiB         109     794 MiB      0.20       127 GiB
+```
+Create filesystem
+```
+$ cd ./cluster/examples/kubernetes/ceph
+$ oc create -f filesystem.yaml
+```
+Progress
+```
+$ oc get pod -l app=rook-ceph-mds
+NAME                                    READY   STATUS     RESTARTS   AGE
+rook-ceph-mds-myfs-a-6b8f55bbd-qw66c    0/1     Init:0/1   0          5s
+rook-ceph-mds-myfs-b-55696b9dd5-r5fbx   0/1     Init:0/1   0          4s
+```
