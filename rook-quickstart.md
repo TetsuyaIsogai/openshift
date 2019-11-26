@@ -390,3 +390,20 @@ NAME                                    READY   STATUS     RESTARTS   AGE
 rook-ceph-mds-myfs-a-6b8f55bbd-qw66c    0/1     Init:0/1   0          5s
 rook-ceph-mds-myfs-b-55696b9dd5-r5fbx   0/1     Init:0/1   0          4s
 ```
+```
+$ oc rsh rook-ceph-tools-5f5dc75fd5-jhkc8
+sh-4.2#
+sh-4.2#
+sh-4.2# ceph df
+RAW STORAGE:
+    CLASS     SIZE        AVAIL       USED        RAW USED     %RAW USED
+    hdd       414 GiB     407 GiB     902 MiB      6.9 GiB          1.66
+    TOTAL     414 GiB     407 GiB     902 MiB      6.9 GiB          1.66
+
+POOLS:
+    POOL              ID     STORED      OBJECTS     USED        %USED     MAX AVAIL
+    replicapool        1     263 MiB         109     794 MiB      0.20       127 GiB
+    myfs-metadata      2     2.2 KiB          22     1.5 MiB         0       127 GiB
+    myfs-data0         3         0 B           0         0 B         0       127 GiB
+```
+
