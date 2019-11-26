@@ -1,5 +1,6 @@
 ## Link
-https://access.redhat.com/documentation/ja-jp/openshift_container_platform/4.1/html/logging/efk-logging-deploying
+https://docs.openshift.com/container-platform/4.2/logging/cluster-logging-deploying.html
+
 
 ## Prerequisite
 OCP4.2
@@ -54,8 +55,6 @@ spec:
 ```
 $ oc get packagemanifest elasticsearch-operator -n openshift-marketplace -o jsonpath='{.status.channels[].name}'
 4.2
-$ oc get packagemanifest elasticsearch-operator -n openshift-marketplace -o jsonpath='{.status.channels[].currentCSV}'
-elasticsearch-operator.4.2.5-201911121709
 ```
 1. Create Subscription object
 ```
@@ -67,10 +66,9 @@ metadata:
 spec:
   channel: "4.2" 
   installPlanApproval: "Automatic"
-  source: "elasticsearch"
-  sourceNamespace: "openshift-operators-redhat"
+  source: "redhat-operators"
+  sourceNamespace: "openshift-marketplace"
   name: "elasticsearch-operator"
-  startingCSV: "elasticsearch-operator.4.2.5-201911121709" 
 ```
 1. Change to the `openshift-operators-redhat` project
 ```
@@ -112,62 +110,61 @@ namespace: openshift-operators-redhat
 ```
 1. Install `Cluster Logging Operator` via Admin console  
 **Specify namespace `cluster-logging`
+**`ElasticSearch`Operator will be installed in `openshift-operators-redhat` namespace
 1. Confirm
 ```
-$ oc project openshift-logging
-Now using project "openshift-logging" on server "https://api.oc4cluster.tetsuya.local:6443".
+$ oc project
+Using project "openshift-operators-redhat" on server "https://api.oc4cluster.tetsuya.local:6443".
 $ oc get all
-NAME                                            READY   STATUS              RESTARTS   AGE
-pod/cluster-logging-operator-7b8c88b586-kg6vx   0/1     ContainerCreating   0          27s
+NAME                                          READY   STATUS    RESTARTS   AGE
+pod/elasticsearch-operator-57f6bdc955-58gb7   1/1     Running   0          3m35s
 
-NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/cluster-logging-operator   0/1     1            0           28s
+NAME                                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/elasticsearch-operator   1/1     1            1           3m37s
 
-NAME                                                  DESIRED   CURRENT   READY   AGE
-replicaset.apps/cluster-logging-operator-7b8c88b586   1         1         0       27s
-```
-**Wait until status is healty on Admin Console
-```
-$ oc get all
+NAME                                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/elasticsearch-operator-57f6bdc955   1         1         1       3m35s
+$ oc get all -n openshift-logging
 NAME                                            READY   STATUS    RESTARTS   AGE
-pod/cluster-logging-operator-7b8c88b586-kg6vx   1/1     Running   0          4m26s
+pod/cluster-logging-operator-7b8c88b586-2kckl   1/1     Running   0          10m
 
 NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/cluster-logging-operator   1/1     1            1           4m27s
+deployment.apps/cluster-logging-operator   1/1     1            1           10m
 
 NAME                                                  DESIRED   CURRENT   READY   AGE
-replicaset.apps/cluster-logging-operator-7b8c88b586   1         1         1       4m26s
+replicaset.apps/cluster-logging-operator-7b8c88b586   1         1         1       10m
 ```
-1. Create `Cluster logging` via Admin Console -> `Custom Resource Definitions` -> `Cluster Logging` -> `Actions` -> `View Instance` -> `Create Cluster Logging`  by creating `CR` below
+**Now You can see both `Cluster Logging` Operator and `Elasticsearch` Operator in the `openshift-logging` namespace
+
 1. Create `Cluster Logging` via Admin Console -> `Installed Operators` -> `Cluster Logging` -> `Create Instance`
 **Change storageClassName appropriately that your cluster have
 ```
-apiVersion: "logging.openshift.io/v1"
-kind: "ClusterLogging"
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogging
 metadata:
-  name: "instance" 
-  namespace: "openshift-logging"
+  name: instance
+  namespace: openshift-logging
 spec:
-  managementState: "Managed"  
+  managementState: Managed
   logStore:
-    type: "elasticsearch"  
+    type: elasticsearch
     elasticsearch:
-      nodeCount: 3 
+      nodeCount: 3
+      redundancyPolicy: SingleRedundancy
       storage:
         storageClassName: rook-ceph-block
-        size: 200G
-      redundancyPolicy: "SingleRedundancy"
+        size: 20G
   visualization:
-    type: "kibana"  
+    type: kibana
     kibana:
       replicas: 1
   curation:
-    type: "curator"  
+    type: curator
     curator:
-      schedule: "30 3 * * *"
+      schedule: 30 3 * * *
   collection:
     logs:
-      type: "fluentd"  
+      type: fluentd
       fluentd: {}
 ```
 1. Click `Create`
