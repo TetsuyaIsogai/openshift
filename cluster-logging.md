@@ -138,7 +138,9 @@ deployment.apps/cluster-logging-operator   1/1     1            1           4m27
 NAME                                                  DESIRED   CURRENT   READY   AGE
 replicaset.apps/cluster-logging-operator-7b8c88b586   1         1         1       4m26s
 ```
-1. Create Cluster logging via Admin Console -> `Custom Resource Definitions` -> `Cluster Logging` -> `Actions` -> `View Instance` -> `Create Cluster Logging`  by creating `CR` below
+1. Create `Cluster logging` via Admin Console -> `Custom Resource Definitions` -> `Cluster Logging` -> `Actions` -> `View Instance` -> `Create Cluster Logging`  by creating `CR` below
+1. Create `Cluster Logging` via Admin Console -> `Installed Operators` -> `Cluster Logging` -> `Create Instance`
+**Change storageClassName appropriately that your cluster have
 ```
 apiVersion: "logging.openshift.io/v1"
 kind: "ClusterLogging"
@@ -152,7 +154,7 @@ spec:
     elasticsearch:
       nodeCount: 3 
       storage:
-        storageClassName: gp2
+        storageClassName: rook-ceph-block
         size: 200G
       redundancyPolicy: "SingleRedundancy"
   visualization:
