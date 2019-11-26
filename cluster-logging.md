@@ -7,7 +7,7 @@ https://docs.openshift.com/container-platform/4.1/logging/config/efk-logging-ela
 OCP4.2
 
 ## Procedure
-1. Create Namespace for `openshift-operators`  
+1. Create Namespace for `openshift-operators-redhat`  
 ```
 apiVersion: v1
 kind: Namespace
