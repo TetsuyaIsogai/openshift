@@ -110,5 +110,63 @@ subjects:
   name: prometheus-k8s
 namespace: openshift-operators-redhat
 ```
+1. Install `Cluster Logging Operator` via Admin console  
+**Specify namespace `cluster-logging`
+1. Confirm
+```
+$ oc project openshift-logging
+Now using project "openshift-logging" on server "https://api.oc4cluster.tetsuya.local:6443".
+$ oc get all
+NAME                                            READY   STATUS              RESTARTS   AGE
+pod/cluster-logging-operator-7b8c88b586-kg6vx   0/1     ContainerCreating   0          27s
 
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/cluster-logging-operator   0/1     1            0           28s
+
+NAME                                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/cluster-logging-operator-7b8c88b586   1         1         0       27s
+```
+**Wait until status is healty on Admin Console
+```
+$ oc get all
+NAME                                            READY   STATUS    RESTARTS   AGE
+pod/cluster-logging-operator-7b8c88b586-kg6vx   1/1     Running   0          4m26s
+
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/cluster-logging-operator   1/1     1            1           4m27s
+
+NAME                                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/cluster-logging-operator-7b8c88b586   1         1         1       4m26s
+```
+1. Create Cluster logging via Admin Console -> `Custom Resource Definitions` -> `Cluster Logging` -> `Actions` -> `View Instance` -> `Create Cluster Logging`  by creating `CR` below
+```
+apiVersion: "logging.openshift.io/v1"
+kind: "ClusterLogging"
+metadata:
+  name: "instance" 
+  namespace: "openshift-logging"
+spec:
+  managementState: "Managed"  
+  logStore:
+    type: "elasticsearch"  
+    elasticsearch:
+      nodeCount: 3 
+      storage:
+        storageClassName: gp2
+        size: 200G
+      redundancyPolicy: "SingleRedundancy"
+  visualization:
+    type: "kibana"  
+    kibana:
+      replicas: 1
+  curation:
+    type: "curator"  
+    curator:
+      schedule: "30 3 * * *"
+  collection:
+    logs:
+      type: "fluentd"  
+      fluentd: {}
+```
+1. Click `Create`
 
