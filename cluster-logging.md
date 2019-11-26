@@ -157,7 +157,7 @@ spec:
         requests:
           cpu: "100m"
           memory: "1Gi"
-      nodeCount: 3
+      nodeCount: 1        #3->1
       redundancyPolicy: ZeroRedundancy
       storage: {}
   visualization:
@@ -175,51 +175,40 @@ spec:
 ```
 1. Click `Create`
 ```
-[newgen@bastion01 cluster-logging]$ oc project openshift-logging
-Now using project "openshift-logging" on server "https://api.oc4cluster.tetsuya.local:6443".
-[newgen@bastion01 cluster-logging]$
-[newgen@bastion01 cluster-logging]$
-[newgen@bastion01 cluster-logging]$
-[newgen@bastion01 cluster-logging]$ oc get all
-NAME                                                READY   STATUS              RESTARTS   AGE
-pod/cluster-logging-operator-f5c55f79c-lc6f9        1/1     Running             0          8m47s
-pod/elasticsearch-cdm-usj0hoy0-1-dcbcf5969-cpw64    0/2     ContainerCreating   0          5m8s
-pod/elasticsearch-cdm-usj0hoy0-2-8fc7dbd75-vxv68    0/2     ContainerCreating   0          4m6s
-pod/elasticsearch-cdm-usj0hoy0-3-86c85998ff-bz49m   0/2     ContainerCreating   0          3m5s
-pod/fluentd-8pqgn                                   0/1     ContainerCreating   0          5m7s
-pod/fluentd-9kxfp                                   0/1     ContainerCreating   0          5m7s
-pod/fluentd-bkx95                                   0/1     ContainerCreating   0          5m7s
-pod/fluentd-cjjcb                                   0/1     ContainerCreating   0          5m7s
-pod/fluentd-sj5l6                                   0/1     ContainerCreating   0          5m7s
-pod/fluentd-xr2cd                                   0/1     ContainerCreating   0          5m7s
-pod/kibana-84cdbf9cbd-mgnxh                         0/2     ContainerCreating   0          5m8s
+$ oc get all
+NAME                                                READY   STATUS    RESTARTS   AGE
+pod/cluster-logging-operator-f5c55f79c-55mx6        1/1     Running   0          3h1m
+pod/elasticsearch-cdm-5ta9e9p7-1-8495b5867d-k6jzt   2/2     Running   0          6m20s
+pod/fluentd-52mcb                                   1/1     Running   0          6m20s
+pod/fluentd-6npzl                                   1/1     Running   0          6m19s
+pod/fluentd-6z67b                                   1/1     Running   0          6m20s
+pod/fluentd-mlddt                                   1/1     Running   0          6m19s
+pod/fluentd-rcbkm                                   1/1     Running   0          6m20s
+pod/fluentd-tnb66                                   1/1     Running   0          6m19s
+pod/kibana-84cdbf9cbd-wvwmb                         2/2     Running   0          6m20s
 
 NAME                            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)     AGE
-service/elasticsearch           ClusterIP   172.30.50.241    <none>        9200/TCP    5m9s
-service/elasticsearch-cluster   ClusterIP   172.30.199.88    <none>        9300/TCP    5m9s
-service/elasticsearch-metrics   ClusterIP   172.30.11.84     <none>        60000/TCP   5m8s
-service/fluentd                 ClusterIP   172.30.239.58    <none>        24231/TCP   5m7s
-service/kibana                  ClusterIP   172.30.235.115   <none>        443/TCP     5m8s
+service/elasticsearch           ClusterIP   172.30.29.247    <none>        9200/TCP    6m22s
+service/elasticsearch-cluster   ClusterIP   172.30.132.91    <none>        9300/TCP    6m22s
+service/elasticsearch-metrics   ClusterIP   172.30.75.206    <none>        60000/TCP   6m22s
+service/fluentd                 ClusterIP   172.30.215.115   <none>        24231/TCP   6m21s
+service/kibana                  ClusterIP   172.30.123.131   <none>        443/TCP     6m22s
 
 NAME                     DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
-daemonset.apps/fluentd   6         6         0       6            0           kubernetes.io/os=linux   5m7s
+daemonset.apps/fluentd   6         6         6       6            6           kubernetes.io/os=linux   6m21s
 
 NAME                                           READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/cluster-logging-operator       1/1     1            1           8m49s
-deployment.apps/elasticsearch-cdm-usj0hoy0-1   0/1     1            0           5m8s
-deployment.apps/elasticsearch-cdm-usj0hoy0-2   0/1     1            0           4m6s
-deployment.apps/elasticsearch-cdm-usj0hoy0-3   0/1     1            0           3m5s
-deployment.apps/kibana                         0/1     1            0           5m8s
+deployment.apps/cluster-logging-operator       1/1     1            1           5h47m
+deployment.apps/elasticsearch-cdm-5ta9e9p7-1   1/1     1            1           6m22s
+deployment.apps/kibana                         1/1     1            1           6m22s
 
 NAME                                                      DESIRED   CURRENT   READY   AGE
-replicaset.apps/cluster-logging-operator-f5c55f79c        1         1         1       8m47s
-replicaset.apps/elasticsearch-cdm-usj0hoy0-1-dcbcf5969    1         1         0       5m8s
-replicaset.apps/elasticsearch-cdm-usj0hoy0-2-8fc7dbd75    1         1         0       4m6s
-replicaset.apps/elasticsearch-cdm-usj0hoy0-3-86c85998ff   1         1         0       3m5s
-replicaset.apps/kibana-84cdbf9cbd                         1         1         0       5m8s
+replicaset.apps/cluster-logging-operator-f5c55f79c        1         1         1       5h47m
+replicaset.apps/elasticsearch-cdm-5ta9e9p7-1-8495b5867d   1         1         1       6m20s
+replicaset.apps/kibana-84cdbf9cbd                         1         1         1       6m20s
 
 NAME                    SCHEDULE     SUSPEND   ACTIVE   LAST SCHEDULE   AGE
-cronjob.batch/curator   30 3 * * *   False     0        <none>          5m8s
+cronjob.batch/curator   30 3 * * *   False     0        <none>          6m21s
 
 NAME                              HOST/PORT                                                PATH   SERVICES   PORT    TERMINATION          WILDCARD
 route.route.openshift.io/kibana   kibana-openshift-logging.apps.oc4cluster.tetsuya.local          kibana     <all>   reencrypt/Redirect   None
