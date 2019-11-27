@@ -271,3 +271,127 @@ fluentd-sj5l6                                   1/1     Running       0         
 fluentd-xr2cd                                   1/1     Running       0          3h2m
 kibana-84cdbf9cbd-bc6z9                         2/2     Running       0          25m
 ```
+## Event Router
+- Set cluster logging to the unmanaged state.
+- Enable the TRANSFORM_EVENTS feature.
+```
+oc set env ds/fluentd TRANSFORM_EVENTS=true
+```
+- Paste to `eventrouter-template.yaml`
+```
+kind: Template
+apiVersion: v1
+metadata:
+  name: eventrouter-template
+  annotations:
+    description: "A pod forwarding kubernetes events to cluster logging stack."
+    tags: "events,EFK,logging,cluster-logging"
+objects:
+  - kind: ServiceAccount 
+    apiVersion: v1
+    metadata:
+      name: eventrouter
+      namespace: ${NAMESPACE}
+  - kind: ClusterRole 
+    apiVersion: v1
+    metadata:
+      name: event-reader
+    rules:   
+    - apiGroups: [""]
+      resources: ["events"]
+      verbs: ["get", "watch", "list"]
+  - kind: ClusterRoleBinding  
+    apiVersion: v1
+    metadata:
+      name: event-reader-binding
+    subjects:
+    - kind: ServiceAccount
+      name: eventrouter
+      namespace: ${NAMESPACE}
+    roleRef:
+      kind: ClusterRole
+      name: event-reader
+  - kind: ConfigMap
+    apiVersion: v1
+    metadata:
+      name: eventrouter
+      namespace: ${NAMESPACE}
+    data:
+      config.json: |-
+        {
+          "sink": "stdout"
+        }
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: eventrouter
+      namespace: ${NAMESPACE}
+      labels:
+        component: eventrouter
+        logging-infra: eventrouter
+        provider: openshift
+    spec:
+      selector:
+        matchLabels:
+          component: eventrouter
+          logging-infra: eventrouter
+          provider: openshift
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            component: eventrouter
+            logging-infra: eventrouter
+            provider: openshift
+          name: eventrouter
+        spec:
+          serviceAccount: eventrouter
+          containers:
+            - name: kube-eventrouter
+              image: ${IMAGE}
+              imagePullPolicy: IfNotPresent
+              resources:
+                limits:
+                  memory: ${MEMORY}
+                requests:
+                  cpu: ${CPU}
+                  memory: ${MEMORY}
+              volumeMounts:
+              - name: config-volume
+                mountPath: /etc/eventrouter
+          volumes:
+            - name: config-volume
+              configMap:
+                name: eventrouter
+parameters:
+  - name: IMAGE 
+    displayName: Image
+    value: "registry.redhat.io/openshift4/ose-logging-eventrouter:latest"
+  - name: MEMORY 
+    displayName: Memory
+    value: "128Mi"
+  - name: CPU  
+    displayName: CPU
+    value: "100m"
+  - name: NAMESPACE  
+    displayName: Namespace
+    value: "openshift-logging"
+```
+- apply
+```
+$ oc process -f eventRouter.yaml | oc apply -f -
+serviceaccount/eventrouter unchanged
+clusterrole.authorization.openshift.io/event-reader configured
+clusterrolebinding.authorization.openshift.io/event-reader-binding created
+configmap/eventrouter unchanged
+deployment.apps/eventrouter created
+```
+- Confirmation
+```
+$ oc get pod --selector  component=eventrouter
+NAME                           READY   STATUS              RESTARTS   AGE
+eventrouter-69784f749d-n6tz5   0/1     ContainerCreating   0          118s
+```
+
+
+
