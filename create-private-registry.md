@@ -86,3 +86,7 @@ podman stop poc-regstry
 ```
 podman start poc-regstry
 ```
+- Check status
+```
+podman info
+```
