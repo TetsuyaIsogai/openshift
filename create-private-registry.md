@@ -91,6 +91,15 @@ Environment="HTTP_PROXY=http://<proxy-server>:3128/"
 Environment="HTTPS_PROXY=http://<proxy-server>:3128/"
 Environment="NO_PROXY=localhost,127.0.0.1,<registry-server>"
 ```
+## How to use private registry when creating Pod in OCP
+- Create secret `.dockerconfigjson`
+- Set proxy by `oc edit proxy/cluster`
+- add `--insecure-registry=true` when use `oc new-app`
+```
+oc new-app <registry-server>:5000/<image-name>:0.1 --insecure-registry=true
+```
+
+
 
 ## Tips
 - Stop registry
