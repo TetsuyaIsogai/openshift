@@ -77,6 +77,21 @@ docker.io/library/registry:2
 curl -u admin:password -k https://registry.oc4cluster.tetsuya.local:5000/v2/_catalog
 ```
 
+## How to Use Insecure registry (under proxy)
+- Write registry server info into `/etc/docker/daemon.json`
+```
+{
+  "insecure-registries" : ["http://<docker-host>:5000"]
+}
+```
+- Proxy info into `/etc/systemd/system/docker.service.d/http_proxy.conf`
+```
+[Service]
+Environment="HTTP_PROXY=http://<proxy-server>:3128/"
+Environment="HTTPS_PROXY=http://<proxy-server>:3128/"
+Environment="NO_PROXY=localhost,127.0.0.1,<registry-server>"
+```
+
 ## Tips
 - Stop registry
 ```
