@@ -1,17 +1,17 @@
 Instractor:
- bthong@redhat.com
- jase.bkthong@gmail.com
+ bthong@redhat.com  
+ jase.bkthong@gmail.com  
 
 https://github.com/RedHatTraining/
 
 ## Lab info
-workstation
-student/student
-https://api.ocp-qyeppkgjxzzvqgj200616.do280.rht-ap.nextcle.com:6443
-eLUie-2d2dL-Hmg9e-4xBLL
-ed9d51a9-f548-4dd3-a91a-3f8cdb25d1e7
+workstation  
+student/student  
+https://api.ocp-qyeppkgjxzzvqgj200616.do280.rht-ap.nextcle.com:6443  
+eLUie-2d2dL-Hmg9e-4xBLL  
+ed9d51a9-f548-4dd3-a91a-3f8cdb25d1e7  
 
-api.ocp-jzjjpoonkkqwynp200618.do280.rht-ap.nextcle.com:
+api.ocp-jzjjpoonkkqwynp200618.do280.rht-ap.nextcle.com:  
 
 ## Concept
 - 高可用性
@@ -28,41 +28,42 @@ api.ocp-jzjjpoonkkqwynp200618.do280.rht-ap.nextcle.com:
 Static Pod: etcd, kube-scheduler, kube-controller-manager, kube-apiserver
 (Directory kubelet runs)
 
-Router:
- allow ingress traffic into the cluster
- Maps DNS to svc
+Router:  
+*  allow ingress traffic into the cluster
+*  Maps DNS to svc  
    svc locate to the backedn pods
 
 Volume:
- `pv` is cluster wide resource
- `pvc` is defined by Developers
+*  `pv` is cluster wide resource
+*  `pvc` is defined by Developers
 
 pod:
-  smallest scheduling unit in k8s
-  1 or more containers
-  shares same IP
-  external storage can use the storage
+*   smallest scheduling unit in k8s
+*   1 or more containers
+*   shares same IP
+*   external storage can use the storage
 
 dc:
-  pod settings
-  Num of replicas
-  triggers
-  dc --> replication controller --> pod
+*   pod settings
+*   Num of replicas
+*   triggers
+*   dc --> replication controller --> pod
 
 deployment:
-  deployment --> replicaset --> pod
+*   deployment --> replicaset --> pod
 
 bc:
-  code + builder image -> final image
-  buld process
-  end result is a new container image
+*   code + builder image -> final image
+*   buld process
+*   end result is a new container image
 
 ImageStream(is):
-  contains image stream tags
-  `oc get all -n openshift`
-  used by `BuildConfig` and `DeploymentConfig`
+*   contains image stream tags
+*   `oc get all -n openshift`
+*   used by `BuildConfig` and `DeploymentConfig`
 
 Example:
+```
     oc create deployment --> deployment
     oc new-app --> deploymentconfig
 
@@ -71,18 +72,19 @@ Example:
     oc new-app -S --image-stream=mysql
     oc new-app -S --docker-image=python
     oc new-app https://github.com/openshift/ruby-hello-world#beta4
-
+```
 
 Operator:
-  Similar to controllers(Observ->Act->)
-  Program to manage another program
-  User defines `CR` defined by `CRD`
-  Operator Framework provide:
-    Practice
-    Distribute
-    Packaging as container image
+*  Similar to controllers(Observ->Act->)
+*  Program to manage another program
+*  User defines `CR` defined by `CRD`
+*  Operator Framework provide:  
+    Practice  
+    Distribute  
+    Packaging as container image  
   * Most Operator reside in their own dedicated projects `openshift-*-operator`  
-Cluster Operator:
+* Cluster Operator:
+    ```
     • dns
     • network
     • ingress
@@ -97,12 +99,12 @@ Cluster Operator:
     • openshift-controller-manager
     • dns
     • cloud-credential
+    ```
 
-Example:
- Change CR
+Example:  
+ Change CR  
  `oc patch configs.imageregistry.operator.openshift.io/cluster ...`  
  https://docs.openshift.com/container-platform/4.1/registry/configuring-registry-operator.html
-
 
 - Supported feature by community K8s can be used in OpenShift
 
@@ -139,7 +141,6 @@ skopeo inspect
 
 oc debug deployment/my-deployment-name --as-root
 ```
-
 
 ## Indentitiy Management
 - User
@@ -188,10 +189,9 @@ oc debug deployment/my-deployment-name --as-root
 
 
 ## How to find CR
-oc get crd | grep <what you find keyword>
-oc get <name>
-oc describe <crd-name> <cr-name>
-
+oc get crd | grep \<what you find keyword\>  
+oc get \<name\>  
+oc describe \<crd-name\> \<cr-name\>
 
 ## RBAC
 * Clusterrole
@@ -233,12 +233,13 @@ oc describe <crd-name> <cr-name>
 
 
 ## Security Context (SCC)
-リソースのアクセスは制限するがOpenShiftの操作は制限しない
+リソースのアクセスは制限するがOpenShiftの操作は制限しない  
 OCP prevent to run as root, also defend by SELINUX  
 default is `restricted`  
 check when pod start to run
 
 * OpenShift's SCC
+```
   • anyuid
   • hostaccess
   • hostmount-anyuid
@@ -247,6 +248,7 @@ check when pod start to run
   • nonroot
   • privileged
   • restricted
+```
 
 * Confirm security context requirement which the pods requests
   ```shell
@@ -254,7 +256,6 @@ check when pod start to run
   RESOURCE            ALLOWED BY
   Pod/mysql-3-2rw8r   anyuid
   ```
-
 
 * Lab
 `oc new-app --name gitlab gitlab/gitlab-ce:8.4.3-ce.0`  
@@ -396,6 +397,7 @@ docker.io/library/wordpress:5.3.0
 
 
 ## Commands
+```
 systemctl status kubelet
 systemctl status crio
 journalctl -u crio, journalctl -f -u kubelet
@@ -451,9 +453,8 @@ oc set volume
 oc new-app
 oc new-app --search
 oc new-app --image-stream
-
-
 ps axo pid,euid,egid,comm
+```
 
 ## YAML Basic
 - No tabs
@@ -464,8 +465,6 @@ ps axo pid,euid,egid,comm
   * allginment is important
 - Dictionaries
   - key: value
-
-
 
 Regarding PV, When we specify `fstype` in `pod.spec.volumes.iscsi` Who does format the filesystem of PV?
 container runtime(crio), or container itself?
