@@ -218,13 +218,11 @@ oc describe \<crd-name\> \<cr-name\>
 ## Secret
 * create secret  
   `oc create secret generic iso-sec-1 --from-literal=user=isogai --from-literal=pass=password`  
-* Set secret into Pod
+* Set secret into Pod  
   `oc set env --from=secret/mysecret dc/myapp`  #As env  
   `oc set volume deploymentconfig.apps.openshift.io/mysql --add --type=secret --secret-name=mysql --mount-path=/app-secrets` #As file
 
-## Configmap
-
-## Secret
+* Command
 `oc create secret generic mysql --from-literal user=myuser --from-literal password=redhat123 --from-literal database=test_secrets --from-literal hostname=mysql`  
 `oc new-app --name mysql --docker-image registry.access.redhat.com/rhscl/mysql-57-rhel7:5.7-47`  
 `oc new-app --name quotes --docker-image quay.io/redhattraining/famous-quotes:1.0`  
